@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Image } from 'react-native';
 import {ToastAndroid} from 'react-native';
 
 
@@ -48,11 +48,12 @@ export default class RegisterScreen extends Component {
 
   render() {
     return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={{width:"100%"}}>
       <View style={styles.container}>
-        <View style={{ flex: 4, alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>
           <Image
             style={styles.imageStyle}
-            source={require('./images/logo_transparent.png')}>
+            source={require('../images/logo_transparent.png')}>
           </Image>
           <TextInput
             style={styles.textInput}
@@ -83,16 +84,16 @@ export default class RegisterScreen extends Component {
           </TouchableOpacity>
           <TouchableOpacity
             style={{backgroundColor: "#065471", marginTop: 20}}
-            //onPress={this.registerUser}
+            onPress={this.props.navigation.goBack}
             >
 
             <Text style={styles.textoLogin}>
               ¿Ya tienes cuenta?
             </Text>
           </TouchableOpacity>
-        </View>
-        
       </View>
+      </ScrollView>
+      </SafeAreaView>
     );
   }
 }
@@ -102,7 +103,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#065471'
+    backgroundColor: '#065471',
+    alignContent: 'center',
+    paddingBottom: 20,
   },
   textoLogin: {
     fontSize: 20,
@@ -135,8 +138,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   imageStyle: {
-    width: 350,
-    height: 350,
-    alignSelf: 'center'
+    width: 120,
+    height: 177,
+    alignSelf: 'center',
+    marginVertical: 80
   }
 });

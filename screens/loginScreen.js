@@ -1,14 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, SafeAreaView, ScrollView } from 'react-native';
 import { ToastAndroid } from 'react-native';
 
 export default class LoginScreen extends Component {
-
-  DB_URL = 'http://localhost:3000';
-
-  static navigationOptions = {
-    header: null
-  };
 
   constructor(props) {
     super(props);
@@ -18,70 +12,58 @@ export default class LoginScreen extends Component {
     }
   }
 
-  /*login = () => {
-    fetch(this.DB_URL + '/usuarios?user=' + this.state.user + '&password=' + this.state.password)
-      .then(resp => resp.json())
-      .then(data => {
-        if (data.length > 0) {
-          this.props.navigation.navigate('Home', {user: data[0]});
-        } else {
-          ToastAndroid.showWithGravity('Usuario o contraseña incorrectos', ToastAndroid.LONG, ToastAndroid.TOP);
-        }
-      });
+  login = () => {
+    this.props.navigation.navigate('Serie');
   }
 
-register = () => {
-  this.props.navigation.navigate('Registro');
-}*/
+  register = () => {
+    this.props.navigation.navigate('Register');
+  }
 
 render() {
   return (
-    <View style={styles.container}>
-      <View style={{ flex: 5, alignContent: 'center', justifyContent: 'center', alignItems: 'center' }}>
-        <Image
-          style={styles.imageStyle}
-          source={require('./images/logo_transparent.png')}>
-        </Image>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={{width:"100%"}}>
+        <View style={styles.container}>
+            <Image
+              style={styles.imageStyle}
+              source={require('../images/logo_transparent.png')}>
+            </Image>
 
-        <TextInput
-          style={styles.textInput}
-          placeholder={"User"}
-          onChangeText={(user) => this.setState({ user })}
-          value={this.state.user}
-        />
+            <TextInput
+              style={styles.textInput}
+              placeholder={"User"}
+              onChangeText={(user) => this.setState({ user })}
+              value={this.state.user}
+            />
 
-        <TextInput
-          style={styles.textInput}
-          placeholder={"Password"}
-          secureTextEntry={true}
-          onChangeText={(password) => this.setState({password})}
-          value={this.state.password}
-        />
+            <TextInput
+              style={styles.textInput}
+              placeholder={"Password"}
+              secureTextEntry={true}
+              onChangeText={(password) => this.setState({password})}
+              value={this.state.password}
+            />
 
-        <TouchableOpacity
-          style={styles.button}
-          //onPress={this.login}
-        >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={this.login}>
+              <Text style={styles.buttonText}>
+                Entrar
+              </Text>
+            </TouchableOpacity>
 
-          <Text style={styles.buttonText}>
-            Entrar
-        </Text>
+            <TouchableOpacity
+              style={styles.button_register}
+              onPress={this.register}>
 
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.button_register}
-          //onPress={this.register}
-        >
-
-          <Text style={styles.buttonText_register}>
-            o regístrate
-        </Text>
-
-        </TouchableOpacity>
-      </View>
-
-    </View>
+              <Text style={styles.buttonText_register}>
+                o regístrate
+              </Text>
+            </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 }
@@ -91,7 +73,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: "#065471"
+    backgroundColor: "#065471",
+    paddingBottom: 20,
+    alignContent: 'center'
   },
 
   button: {
@@ -154,9 +138,9 @@ const styles = StyleSheet.create({
 
   },
   imageStyle: {
-    width: 350,
-    height: 350,
-    marginBottom: 10,
-    alignSelf: 'center'
+    width: 120,
+    height: 177,
+    alignSelf: 'center',
+    marginVertical: 80
   }
 });

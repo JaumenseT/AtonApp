@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, ActivityIndicator, ScrollView, SafeAreaView, Button } from 'react-native';
 import {ToastAndroid} from 'react-native';
 import TVDB from 'node-tvdb';
-import config from './config';
-import constants from './constants';
+import config from '../config';
+import constants from '../constants';
 import { Divider, Icon } from 'react-native-elements';
 
 
@@ -42,7 +42,7 @@ function SeccionesLaterales(props) {
 
 function TemporadasComponent(props) {
   return (
-    <TouchableOpacity style={styles.temporadaStyle}>
+    <TouchableOpacity style={styles.temporadaStyle} onPress={props.onPress}>
       <Text style={styles.temporadaTitle}>Temporada {props.numeroTemporada}</Text>
       <View style={{flexDirection: "row"}}>
         <Text style={styles.episodioStyle}>{props.numeroEpisodios}</Text>
@@ -52,14 +52,12 @@ function TemporadasComponent(props) {
   )
 }
 
-const URLPoster = "https://artworks.thetvdb.com/banners/";
-
-export default class RegisterScreen extends Component {
+export default class SerieScreen extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      idSerie: 281621,
+      idSerie: 121361,
       status: constants.WAITING,
       title: "",
       imagenSerie: "",
@@ -78,16 +76,21 @@ export default class RegisterScreen extends Component {
     
   }
 
+  temporadaClick = (numeroTemporada) => {
+    this.props.navigation.navigate("Temporada", {
+      idSerie: this.state.idSerie,
+      tituloTemporada: "Temporada " + numeroTemporada,
+      numTemporada: numeroTemporada,
+    })
+  }
+
   onPressShowMore = () => {
     this.setState({existeDescripcionCorta: false})
   }
   componentDidMount() {
     this.setState({status: constants.WAITING});
-    let tvdb = new TVDB("65bad5c8795f9d6e359b1b0c9b9b3145");
+    let tvdb = new TVDB(config.tvdb_key);
     tvdb.language = "es";
-    console.log(config.tvdb_key);
-    console.log(this.state.idSerie);
-
     
     /*getSeriesById(this.state.idSerie)
       .then(response => {
@@ -117,7 +120,7 @@ export default class RegisterScreen extends Component {
           } 
         }
         this.setState({title: response.seriesName,
-            imagenSerie: URLPoster + response.poster,
+            imagenSerie: config.URLBanner + response.poster,
             descripcion: response.overview,
             puntuacionSerie: response.siteRating.toString(),
             estadoSerie: response.status,
@@ -226,7 +229,14 @@ export default class RegisterScreen extends Component {
           )}
           {this.state.temporadas.map((item) => {
             return (
-              <TemporadasComponent numeroTemporada={item.num} numeroEpisodios={item.episodios}></TemporadasComponent>
+              <TemporadasComponent numeroTemporada={item.num} numeroEpisodios={item.episodios}
+                key={item.num}
+                idSerie={this.state.idSerie}
+                onPress= {() => {
+                  let numerotemporada = item.num;
+                  this.temporadaClick(numerotemporada);
+                }}
+              ></TemporadasComponent>
               );
           })}
           </React.Fragment>
@@ -346,5 +356,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     color: "#33260e"
   }
-
 });
