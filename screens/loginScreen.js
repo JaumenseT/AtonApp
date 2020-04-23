@@ -8,12 +8,17 @@ export default class LoginScreen extends Component {
     super(props);
     this.state = {
       user: "",
-      password: ""
+      password: "",
     }
+    this.idSerie = 121361;
   }
 
+  /*login = () => {
+    this.props.navigation.navigate('Serie', {idSerie: this.idSerie});
+  }*/
+
   login = () => {
-    this.props.navigation.navigate('Serie');
+    this.props.navigation.navigate('Home');
   }
 
   register = () => {
@@ -33,7 +38,7 @@ render() {
             <TextInput
               style={styles.textInput}
               placeholder={"User"}
-              onChangeText={(user) => this.setState({ user })}
+              onChangeText={(user) => this.setState({user})}
               value={this.state.user}
             />
 

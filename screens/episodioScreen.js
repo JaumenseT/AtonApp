@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, 
          TextInput, ActivityIndicator, ScrollView,
-         SafeAreaView, Button, Dimensions, RefreshControlBase, Image} from 'react-native';
+         SafeAreaView, Button, Dimensions, RefreshControlBase, Image, ImageBackground} from 'react-native';
 import {ToastAndroid} from 'react-native';
 import TVDB from 'node-tvdb';
 import config from '../config';
@@ -23,6 +23,8 @@ export default class EpisodioScreen extends Component {
         tituloEpisodio: "",
         numEpisodio: "",
         episodeBanner: "",
+        descripcionEpisodio: "",
+        numValoraciones: "",
       }
       this.idSerie = this.props.route.params.idSerie;
       this.idEpisodio = this.props.route.params.idEpisodio;
@@ -35,7 +37,18 @@ export default class EpisodioScreen extends Component {
 
     async ObtenerInformacion() {
         let tvdb = new TVDB(config.tvdb_key, 'es');
-        this.datosSerie = tvdb.getSeriesAllById(this.idSerie);
+        this.datosSerie = await tvdb.getSeriesAllById(this.idSerie);
+    }
+
+    volverSerie = () => {
+        this.props.navigation.navigate('Serie', {idSerie: this.idSerie});
+    }
+
+    volverTemporada = () => {
+        this.props.navigation.navigate('Temporada', {
+            idSerie: this.idSerie,
+            numTemporada: this.state.numTemporada,
+        })
     }
 
     componentDidMount() {
@@ -44,6 +57,7 @@ export default class EpisodioScreen extends Component {
         let r2 = this.ObtenerInformacion();
         Promise.all([r1, r2])
         .then((resultados) => {
+            console.log(this.datosSerie);
             this.setState({
                 status: constants.OK,
                 tituloSerie: this.datosSerie.seriesName,
@@ -55,8 +69,9 @@ export default class EpisodioScreen extends Component {
                 tituloEpisodio: this.datosEpisodio.episodeName,
                 numEpisodio: this.datosEpisodio.airedEpisodeNumber,
                 episodeBanner: config.URLBanner + this.datosEpisodio.filename,
+                descripcionEpisodio: this.datosEpisodio.overview,
+                numValoraciones: this.datosEpisodio.siteRatingCount,
             });
-            console.log(this.state.episodeBanner);
         })
         .catch(error => {
             console.info(error);
@@ -80,10 +95,25 @@ export default class EpisodioScreen extends Component {
                     { this.state.status==constants.OK && (
                         <React.Fragment>
                             <View>
-                                <ScalableImage
-                                    width={Dimensions.get('window').width} 
+                                <ImageBackground
+                                    style={styles.imageStyle}
                                     source={{uri: this.state.episodeBanner}}>
-                                </ScalableImage>
+                                        <Text style={styles.titleText}>{this.state.numEpisodio} | {this.state.tituloEpisodio}</Text>
+                                        <TouchableOpacity style={styles.leerMasButton} onPress={this.volverSerie}>
+                                            <Text style={{color: "white", fontFamily: "sans-serif"}}>{this.state.tituloSerie}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity style={styles.leerMasButton} onPress={this.volverTemporada}>
+                                            <Text style={{color: "white", fontFamily: "sans-serif"}}>Temporada {this.state.numTemporada}</Text>
+                                        </TouchableOpacity>
+                                </ImageBackground>
+                                <Text style={styles.descripcionText}>{this.state.descripcionEpisodio}</Text>
+                                <Divider
+                                    style={{backgroundColor: "#ffc045", borderWidth: 3, height: 8, borderColor: "#065471"}}>
+                                </Divider>
+                                <Text style={styles.descripcionText}>Rating: {this.state.ratingEpisodio} ({this.state.numValoraciones} valoraciones)</Text>
+                                <Text style={styles.descripcionText}>Fecha de emisión: {this.state.fechaEpisodio}</Text>
+                                <Text style={styles.descripcionText}>Director: {this.state.directorEpisodio.join(", ")}</Text>
+                                <Text style={styles.descripcionText}>Guionistas: {this.state.writersEpisodio.join(", ")}</Text>
                             </View>
                         </React.Fragment>
                     )}
@@ -102,11 +132,12 @@ const styles = StyleSheet.create({
       alignContent: "center"
     },
     leerMasButton: {
-      width: 120,
+      alignSelf: "flex-start",
       borderRadius: 5,
-      backgroundColor: "#065471",
+      backgroundColor: "#065471cc",
       padding: 5,
-      alignItems: "center"
+      alignItems: "center",
+      margin: 6
     },
     textoLogin: {
       fontSize: 20,
@@ -147,12 +178,16 @@ const styles = StyleSheet.create({
     },
     titleText: {
       margin: 5,
-      fontSize: 30,
+      fontSize: 25,
+      backgroundColor: "#000000aa",
       fontWeight: "bold",
       color: "#ffc045",
-      padding: 5,
+      paddingVertical: 3,
+      paddingHorizontal: 6,
+      borderRadius: 5,
       alignSelf: "center",
-      fontFamily: "sans-serif"
+      fontFamily: "sans-serif",
+      alignSelf: "flex-start"
     },
     button: {
       width: 275,
@@ -171,12 +206,10 @@ const styles = StyleSheet.create({
     imageStyle: {
       alignSelf: 'center',
       resizeMode: "center",
-      width: "90%",
-      height: "90%",
-      borderColor: "white",
-      borderWidth: 1,
+      width: Dimensions.get('window').width,
+      minHeight: (Dimensions.get('window').width)*0.40,
       alignSelf: "center",
-      marginTop: 5
+      marginBottom: 5,
     },
     temporadaStyle: {
       flexDirection: "row",

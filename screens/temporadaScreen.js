@@ -34,14 +34,14 @@ export default class TemporadaScreen extends Component {
       status: constants.WAITING,
       banner: "",
       episodios: null,
-      tituloTemporada: props.route.params.tituloTemporada,
+      tituloTemporada: "Temporada " + props.route.params.numTemporada,
     }
     this.idSerie = this.props.route.params.idSerie;
   }
 
   episodioClick = (idEpisodio) => {
     this.props.navigation.navigate("Episodio", {
-      idSerie: this.state.idSerie,
+      idSerie: this.idSerie,
       idEpisodio: idEpisodio
     })
   }
@@ -98,7 +98,10 @@ export default class TemporadaScreen extends Component {
           nombreSerie: this.datosSerie.seriesName,
         });
       }); 
-    
+  }
+
+  volverSerie = () => {
+    this.props.navigation.navigate('Serie', {idSerie: this.idSerie});
   }
 
   render() {
@@ -122,7 +125,7 @@ export default class TemporadaScreen extends Component {
                   source={{uri: this.state.banner}}>
                 </ScalableImage>
                 <Text style={styles.titleText}>{this.state.tituloTemporada}</Text>
-                <TouchableOpacity style={styles.leerMasButton} onPress={this.props.navigation.goBack}>
+                <TouchableOpacity style={styles.leerMasButton} onPress={this.volverSerie}>
                   <Text style={{color: "white", fontFamily: "sans-serif"}}>{this.state.nombreSerie}</Text>
                 </TouchableOpacity>
                 {this.state.episodios.map((item, i) => {
@@ -154,7 +157,7 @@ const styles = StyleSheet.create({
     alignContent: "center"
   },
   leerMasButton: {
-    width: 120,
+    alignSelf: "flex-start",
     borderRadius: 5,
     backgroundColor: "#065471",
     padding: 5,

@@ -34,7 +34,7 @@ function SeccionesLaterales(props) {
   return (
     <View style={{flexDirection: "row"}}>
       <Text style={styles.seccionesTextTitle}>{props.name}: </Text>
-      <Text style={styles.seccionesTextValue}>{props.value}</Text>
+      <Text style={styles.seccionesTextValue} numberOfLines={2}>{props.value}</Text>
       
     </View>
   )
@@ -57,7 +57,6 @@ export default class SerieScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      idSerie: 121361,
       status: constants.WAITING,
       title: "",
       imagenSerie: "",
@@ -70,6 +69,7 @@ export default class SerieScreen extends Component {
       descripcionCorta: "",
       existeDescripcionCorta: false
     }
+    this.idSerie = props.route.params.idSerie;
   }
 
   getSeriesById = async function(id) {
@@ -78,8 +78,7 @@ export default class SerieScreen extends Component {
 
   temporadaClick = (numeroTemporada) => {
     this.props.navigation.navigate("Temporada", {
-      idSerie: this.state.idSerie,
-      tituloTemporada: "Temporada " + numeroTemporada,
+      idSerie: this.idSerie,
       numTemporada: numeroTemporada,
     })
   }
@@ -100,7 +99,7 @@ export default class SerieScreen extends Component {
         this.setState({status: constants.ERROR})
       });*/
     
-    tvdb.getSeriesAllById(this.state.idSerie)
+    tvdb.getSeriesAllById(this.idSerie)
       .then(response => {
         console.log(response);
         let auxTemporada = [];
@@ -231,7 +230,7 @@ export default class SerieScreen extends Component {
             return (
               <TemporadasComponent numeroTemporada={item.num} numeroEpisodios={item.episodios}
                 key={item.num}
-                idSerie={this.state.idSerie}
+                idSerie={this.idSerie}
                 onPress= {() => {
                   let numerotemporada = item.num;
                   this.temporadaClick(numerotemporada);
@@ -256,7 +255,7 @@ const styles = StyleSheet.create({
     alignContent: "center"
   },
   leerMasButton: {
-    width: 120,
+    alignSelf: "center",
     borderRadius: 5,
     backgroundColor: "#065471",
     padding: 5,
@@ -297,7 +296,8 @@ const styles = StyleSheet.create({
     marginLeft: 0,
     marginRight: 5,
     paddingBottom: 5,
-    fontFamily: "sans-serif"
+    fontFamily: "sans-serif",
+    flex: 1
   },
   titleText: {
     margin: 5,
