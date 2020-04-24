@@ -29,13 +29,30 @@ export default class HomeScreen extends Component {
         super(props);
         this.state = {
             buscador: "",
-            series: []
+            series: [],
+            buscando: false,
+            mensajeError: false,
         }
     }
 
     buscadorOnChange = (texto) => {
         this.setState({buscador: texto});
-        this.buscarSerie(texto);
+        if (texto.length > 2) {
+            this.buscarSerie(texto);
+        } else if (texto.length == 0){
+            this.setState({
+                buscando: false,
+                series: [],
+                mensajeError: null,
+            });
+        } else {
+            this.setState({
+                buscando: false,
+                series: [],
+                mensajeError: "Introduce por los menos 3 carácteres...",
+            });
+        }
+        
     }
 
     serieOnClick = (id) => {
@@ -46,17 +63,28 @@ export default class HomeScreen extends Component {
 
     async buscarSerie (textoBuscador) {
         let tvdb = new TVDB(config.tvdb_key, 'es');
-        let datos = await tvdb.getSeriesByName(textoBuscador);
-        let aux = [];
-        for (let i=0; i<datos.length; i++) {
-            if (datos[i].firstAired != null) {
-                aux.push(datos[i]);
+        this.setState({buscando: true, mensajeError: false})
+        try {
+            let datos = await tvdb.getSeriesByName(textoBuscador);
+            let aux = [];
+            for (let i=0; i<datos.length; i++) {
+                if (datos[i].firstAired != null) {
+                    aux.push(datos[i]);
+                }
             }
+            this.setState({
+                series: aux.slice(0,49),
+                buscando: false,
+                mensajeError: null,
+            });
+            console.log(this.state.series);
+        } catch (error) {
+            this.setState({
+                buscando: false,
+                series: [],
+                mensajeError: "No se han encontrado resultados para su búsqueda.",
+            })
         }
-        this.setState({
-            series: aux.slice(0,49)
-        });
-        console.log(this.state.series);
     }
 
     render() {
@@ -72,18 +100,36 @@ export default class HomeScreen extends Component {
                     </TextInput>
                     <Icon name="search1" type="antdesign"></Icon>
                     </View>
-                    {this.state.series.map((item) => {
-                        return (
-                            <SerieComponent 
-                                nameSerie={item.seriesName}
-                                image={item.image}
-                                key={item.id}
-                                onPress= {() => {
-                                    this.serieOnClick(item.id);
-                                }}>
-                            </SerieComponent>
-                        );
-                    })}
+                    { this.state.buscando && (
+                        <View>
+                            <ActivityIndicator
+                                style={{alignSelf: "center", marginTop: 40}}
+                                size="large"
+                                color= "white">
+                            </ActivityIndicator>
+                        </View>
+                    )}
+                    { !this.state.buscando && this.state.mensajeError && (
+                        <Text 
+                        style={{backgroundColor: "#c94536", color: "white", padding: 8, fontSize: 15, textAlign: "center", width: "100%"}}
+                        >{this.state.mensajeError}</Text>
+                    )}
+
+                    { !this.state.buscando  && (
+                        this.state.series.map((item) => {
+                            return (
+                                <SerieComponent 
+                                    nameSerie={item.seriesName}
+                                    image={item.image}
+                                    key={item.id}
+                                    onPress= {() => {
+                                        this.serieOnClick(item.id);
+                                    }}>
+                                </SerieComponent>
+                            );
+                        })
+                    )}
+                    
                 </ScrollView>
             </SafeAreaView>
         )
