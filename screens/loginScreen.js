@@ -1,13 +1,30 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, TextInput, Image, SafeAreaView, ScrollView } from 'react-native';
 import { ToastAndroid } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage'; 
+import config from '../config';
+
+async function GetUser(userName, password) {
+  let headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  headers.append("Accept-Language", "es");
+  
+  let resultado = await fetch(config.endpoint+"Login?userName="+
+      encodeURIComponent(userName)+"&password="+encodeURIComponent(password));
+  
+  let json = await resultado.json();
+  if (json.error) {
+    throw new Error(json.error);
+  }
+  return json;
+}
 
 export default class LoginScreen extends Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      user: "",
+      userName: "",
       password: "",
     }
     this.idSerie = 121361;
@@ -18,7 +35,16 @@ export default class LoginScreen extends Component {
   }*/
 
   login = () => {
-    this.props.navigation.navigate('Home');
+    GetUser(this.state.userName, this.state.password)
+      .then(response => {
+        AsyncStorage.setItem("token", response.token)
+        .then(() => {
+          this.props.navigation.navigate('Home');
+        });
+      })
+      .catch(error => {
+        ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+      });
   }
 
   register = () => {
@@ -38,8 +64,8 @@ render() {
             <TextInput
               style={styles.textInput}
               placeholder={"User"}
-              onChangeText={(user) => this.setState({user})}
-              value={this.state.user}
+              onChangeText={(userName) => this.setState({userName})}
+              value={this.state.userName}
             />
 
             <TextInput

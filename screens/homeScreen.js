@@ -72,12 +72,14 @@ export default class HomeScreen extends Component {
                     aux.push(datos[i]);
                 }
             }
-            this.setState({
-                series: aux.slice(0,49),
-                buscando: false,
-                mensajeError: null,
-            });
-            console.log(this.state.series);
+            if (this.state.buscador.length > 2) {
+                this.setState({
+                    series: aux.slice(0,49),
+                    buscando: false,
+                    mensajeError: null,
+                });
+                console.log(this.state.series);
+            }
         } catch (error) {
             this.setState({
                 buscando: false,

@@ -1,11 +1,34 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, TextInput, Image } from 'react-native';
-import {ToastAndroid} from 'react-native';
+import { ToastAndroid } from 'react-native';
+import config from '../config';
 
+
+async function addUser(name, userName, password) {
+  let headers = new Headers();
+  headers.append("Content-Type", "application/json");
+  headers.append("Accept-Language", "es");
+  let body = {
+    name,
+    userName,
+    password,
+  };
+  console.log(body);
+  let resultado = await fetch(config.endpoint+"/Usuarios",
+    {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(body),
+    }
+  );
+  let json = await resultado.json();
+  console.log(json);
+  if (json.error) {
+    throw new Error(json.error);
+  }
+}
 
 export default class RegisterScreen extends Component {
-
-  DB_URL = 'http://localhost:3000';
 
   constructor(props) {
     super(props);
@@ -16,83 +39,63 @@ export default class RegisterScreen extends Component {
     }
   }
 
-
-  /*registerUser = () => {
-    console.log(this.DB_URL + "/usuarios?_sort=id&_order=desc&_limit=1");
-    fetch(this.DB_URL + "/usuarios?_sort=id&_order=desc&_limit=1")
-      .then(resp => resp.json())
-      .then(data => {
-        console.log(data[0].id + 1);
-        let dades = {
-          id: data[0].id + 1,
-          user: this.state.user,
-          password: this.state.password,
-          admin: false
-        };
-        console.log(JSON.stringify(dades));
-        fetch(this.DB_URL + "/usuarios", {
-          method: 'POST',
-          body: JSON.stringify(dades),
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8'
-          }
-        })
-          .then(resp => {
-            ToastAndroid.showWithGravity('Usuario registrado correctamente', ToastAndroid.LONG, ToastAndroid.TOP),
-            this.props.navigation.navigate('Login');
-          });
-
-      });
-
-  }*/
+  registerUser = () => {
+    addUser(this.state.name, this.state.user, this.state.password)
+    .then(response => {
+      ToastAndroid.showWithGravity('Usuario registrado correctamente', ToastAndroid.LONG, ToastAndroid.TOP);
+      this.props.navigation.navigate("Login");
+    }).catch(error => {
+      ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+    });
+  }
 
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        <ScrollView style={{width:"100%"}}>
-      <View style={styles.container}>
-          <Image
-            style={styles.imageStyle}
-            source={require('../images/logo_transparent.png')}>
-          </Image>
-          <TextInput
-            style={styles.textInput}
-            placeholder={"Name"}
-            onChangeText={(name) => this.setState({ name })}
-            value={this.state.name}
-          />
-          <TextInput style={styles.textInput}
-            placeholder={"Username"}
-            onChangeText={(user) => this.setState({ user })}
-            value={this.state.user}
-          />
+        <ScrollView style={{ width: "100%" }}>
+          <View style={styles.container}>
+            <Image
+              style={styles.imageStyle}
+              source={require('../images/logo_transparent.png')}>
+            </Image>
+            <TextInput
+              style={styles.textInput}
+              placeholder={"Name"}
+              onChangeText={(name) => this.setState({ name })}
+              value={this.state.name}
+            />
+            <TextInput style={styles.textInput}
+              placeholder={"Username"}
+              onChangeText={(user) => this.setState({ user })}
+              value={this.state.user}
+            />
 
-          <TextInput style={styles.textInput}
-            placeholder={"Password"}
-            secureTextEntry={true}
-            onChangeText={(password) => this.setState({ password })}
-            value={this.state.password}
-          />
-          <TouchableOpacity
-            style={styles.button}
-            //onPress={this.registerUser}
+            <TextInput style={styles.textInput}
+              placeholder={"Password"}
+              secureTextEntry={true}
+              onChangeText={(password) => this.setState({ password })}
+              value={this.state.password}
+            />
+            <TouchableOpacity
+              style={styles.button}
+              onPress={this.registerUser}
             >
 
-            <Text style={styles.buttonText}>
-              Register
+              <Text style={styles.buttonText}>
+                Register
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{backgroundColor: "#065471", marginTop: 20}}
-            onPress={this.props.navigation.goBack}
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ backgroundColor: "#065471", marginTop: 20 }}
+              onPress={this.props.navigation.goBack}
             >
 
-            <Text style={styles.textoLogin}>
-              ¿Ya tienes cuenta?
+              <Text style={styles.textoLogin}>
+                ¿Ya tienes cuenta?
             </Text>
-          </TouchableOpacity>
-      </View>
-      </ScrollView>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
       </SafeAreaView>
     );
   }

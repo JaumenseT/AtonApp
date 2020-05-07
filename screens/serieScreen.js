@@ -5,9 +5,10 @@ import TVDB from 'node-tvdb';
 import config from '../config';
 import constants from '../constants';
 import { Divider, Icon } from 'react-native-elements';
+import AsyncStorage from '@react-native-community/async-storage';
 
 
-async function getSeriesById(id) {
+/*async function getSeriesById(id) {
   let headers=new Headers();
   headers.append("Content-Type",  "application/json");
   headers.append("Accept-Language", "es");
@@ -28,6 +29,38 @@ async function getSeriesById(id) {
     headers: headers,
   });  
   return resultado.json();  
+}*/
+
+async function GetSerieUsuario(idSerie) {
+  let token = await AsyncStorage.getItem("token");
+  let headers=new Headers();
+  headers.append("Content-Type",  "application/json");
+  headers.append("Accept-Language", "es");
+  headers.append("Authorization", "Bearer "+token);
+  let resultado = await fetch(config.endpoint+"Series/"+idSerie,
+                  {
+                    method: "GET",
+                    headers: headers,
+                  });
+  let json = await resultado.json();
+  if (json.error) {
+    throw new Error(json.error);
+  } else {
+    return json;
+  }
+} 
+
+async function GestionarSubscription(idSerie, subscribe) {
+  let token = await AsyncStorage.getItem("token");
+  let headers=new Headers();
+  headers.append("Content-Type",  "application/json");
+  headers.append("Accept-Language", "es");
+  headers.append("Authorization", "Bearer "+token);
+  let resultado = await fetch(config.endpoint+"Series?idSerie="+idSerie,
+                  {
+                    method: subscribe ? "POST" : "DELETE",
+                    headers: headers,
+                  });
 }
 
 function SeccionesLaterales(props) {
@@ -67,7 +100,8 @@ export default class SerieScreen extends Component {
       numTemporadas: "",
       temporadas: null,
       descripcionCorta: "",
-      existeDescripcionCorta: false
+      existeDescripcionCorta: false,
+      seriesStatus: false,
     }
     this.idSerie = props.route.params.idSerie;
   }
@@ -86,6 +120,14 @@ export default class SerieScreen extends Component {
   onPressShowMore = () => {
     this.setState({existeDescripcionCorta: false})
   }
+
+  switchSerie = () => {
+    GestionarSubscription(this.idSerie, !this.state.seriesStatus);
+    this.setState({
+      seriesStatus: !this.state.seriesStatus,
+    });
+  }
+  
   componentDidMount() {
     this.setState({status: constants.WAITING});
     let tvdb = new TVDB(config.tvdb_key);
@@ -99,12 +141,10 @@ export default class SerieScreen extends Component {
         this.setState({status: constants.ERROR})
       });*/
     
-    tvdb.getSeriesAllById(this.idSerie)
+    var p1=tvdb.getSeriesAllById(this.idSerie)
       .then(response => {
-        console.log(response);
         let auxTemporada = [];
         for (let i = 1; i<=response.season; i++) {
-          console.log(i);
           auxTemporada.push({
             num: i,
             episodios: 0,
@@ -125,8 +165,7 @@ export default class SerieScreen extends Component {
             estadoSerie: response.status,
             numTemporadas: response.season,
             platformSerie: response.network,
-            temporadas: auxTemporada,
-            status: constants.OK});
+            temporadas: auxTemporada});
 
         let auxDescripcion = this.state.descripcion.split(" ");
         if (auxDescripcion.length > 50) {
@@ -135,42 +174,31 @@ export default class SerieScreen extends Component {
             existeDescripcionCorta: true,
           })
         }
-        console.log(auxDescripcion.length);
-        
-      }).catch(error => {
-        console.info(error);
-        this.setState({status: constants.ERROR})
       });
+
+      var p2=GetSerieUsuario(this.idSerie)
+        .then(response => {
+          this.setState({
+            seriesStatus: "IdSerie" in response,
+          });
+        })
+        .catch(error => {
+          ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+        });
+
+      Promise.all([p1, p2])
+        .then(() => {
+          this.setState({
+            status: constants.OK,
+          })
+        })
+        .catch(() => {
+          this.setState({
+            status: constants.ERROR,
+          });
+        });
   }
 
-  /*registerUser = () => {
-    console.log(this.DB_URL + "/usuarios?_sort=id&_order=desc&_limit=1");
-    fetch(this.DB_URL + "/usuarios?_sort=id&_order=desc&_limit=1")
-      .then(resp => resp.json())
-      .then(data => {
-        console.log(data[0].id + 1);
-        let dades = {
-          id: data[0].id + 1,
-          user: this.state.user,
-          password: this.state.password,
-          admin: false
-        };
-        console.log(JSON.stringify(dades));
-        fetch(this.DB_URL + "/usuarios", {
-          method: 'POST',
-          body: JSON.stringify(dades),
-          headers: {
-            'Content-Type': 'application/json; charset=UTF-8'
-          }
-        })
-          .then(resp => {
-            ToastAndroid.showWithGravity('Usuario registrado correctamente', ToastAndroid.LONG, ToastAndroid.TOP),
-            this.props.navigation.navigate('Login');
-          });
-
-      });
-
-  }*/
 
   render() {
     return (
@@ -199,11 +227,22 @@ export default class SerieScreen extends Component {
                 source={{uri: this.state.imagenSerie}}>
               </Image>
             </View>
-              <View style={{flex: 1, flexDirection: "column", justifyContent: 'flex-start', height: "100%"}}>
+              <View style={{flex: 1, flexDirection: "column", justifyContent: 'flex-start', height: "100%", alignSelf: "stretch"}}>
                 <SeccionesLaterales name="Rating" value={this.state.puntuacionSerie}></SeccionesLaterales>
                 <SeccionesLaterales name="Temporadas" value={this.state.numTemporadas}></SeccionesLaterales>
                 <SeccionesLaterales name="Plataforma" value={this.state.platformSerie}></SeccionesLaterales>
                 <SeccionesLaterales name="Estado" value={this.state.estadoSerie}></SeccionesLaterales>
+                <View style={{flex: 1, alignItems: "center", justifyContent: "center"}}>
+                  <TouchableOpacity onPress={this.switchSerie}>
+                    {!this.state.seriesStatus && (
+                      <Icon name="pluscircleo" type="antdesign" color="#ffc045" size={40}></Icon>
+                    )}
+                    {this.state.seriesStatus && (
+                      <Icon name="checkcircle" type="antdesign" color="#ffc045" size={40}></Icon>
+                    )}
+                    
+                  </TouchableOpacity>
+                </View>
               </View>
           </View>
           <Divider

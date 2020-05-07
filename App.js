@@ -21,7 +21,31 @@ const Stack = createStackNavigator();
       />
     </View>
   );
-}*/
+}
+
+<Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{
+            title: "",
+            headerStyle: {
+              backgroundColor: "#065471"
+            }
+          }}
+        />
+        <Stack.Screen
+          name="Register"
+          component={RegisterScreen}
+          options={{
+            title: "",
+            headerStyle: {
+              backgroundColor: "#065471"
+            }
+          }}
+        />
+*/
+
+
 
 export default function App() {
   return (
@@ -41,6 +65,7 @@ export default function App() {
             fontWeight: 'normal',
           },
         }}>
+
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -60,7 +85,16 @@ export default function App() {
               backgroundColor: "#065471"
             }
           }}
-        />        
+        />
+
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{
+            headerShown: false
+          }}
+        />
+                
         <Stack.Screen
           name="Serie"
           component={SerieScreen}
@@ -84,14 +118,7 @@ export default function App() {
             title: "",
           }}
         />
-
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{
-            title: "",
-          }}
-        />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );

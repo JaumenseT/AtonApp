@@ -8,6 +8,42 @@ import config from '../config';
 import constants from '../constants';
 import ScalableImage from "react-native-scalable-image";
 import { Divider, Icon } from 'react-native-elements';
+import AsyncStorage from '@react-native-community/async-storage';
+
+async function GetCapituloUsuario(idCapitulo) {
+  let token = await AsyncStorage.getItem("token");
+  let headers=new Headers();
+  headers.append("Content-Type",  "application/json");
+  headers.append("Accept-Language", "es");
+  headers.append("Authorization", "Bearer "+token);
+  console.log(idCapitulo);
+  let resultado = await fetch(config.endpoint+"Capitulo?id="+idCapitulo,
+                  {
+                    method: "GET",
+                    headers: headers,
+                  });
+  let json = await resultado.json();
+  if (json.error) {
+    throw new Error(json.error);
+  } else {
+    return json;
+  }
+} 
+
+async function GestionarVisto(idCapitulo, idSerie, numEpisodio, numTemporada, view) {
+  let token = await AsyncStorage.getItem("token");
+  let headers=new Headers();
+  headers.append("Content-Type",  "application/json");
+  headers.append("Accept-Language", "es");
+  headers.append("Authorization", "Bearer "+token);
+  let resultado = await fetch(config.endpoint+"Capitulo?idCapitulo="+idCapitulo+"&idSerie="+idSerie+
+                  "&numCapitulo="+numEpisodio+"&numTemporada="+numTemporada,
+                  {
+                    method: view ? "POST" : "DELETE",
+                    headers: headers,
+                  });
+}
+
 
 export default class EpisodioScreen extends Component {
     constructor(props) {    
@@ -25,6 +61,7 @@ export default class EpisodioScreen extends Component {
         episodeBanner: "",
         descripcionEpisodio: "",
         numValoraciones: "",
+        statusEpisodio: false
       }
       this.idSerie = this.props.route.params.idSerie;
       this.idEpisodio = this.props.route.params.idEpisodio;
@@ -51,11 +88,27 @@ export default class EpisodioScreen extends Component {
         })
     }
 
+    switchCapitulo = () => {
+      GestionarVisto(this.idEpisodio, this.idSerie, this.state.numEpisodio, this.state.numTemporada, !this.state.statusEpisodio);
+      this.setState({
+        statusEpisodio: !this.state.statusEpisodio,
+      });
+    }
+
     componentDidMount() {
         this.setState({status: constants.WAITING});
         let r1 = this.ObtenerEpisodio();
         let r2 = this.ObtenerInformacion();
-        Promise.all([r1, r2])
+        let r3 = GetCapituloUsuario(this.idEpisodio)
+          .then(response => {
+            this.setState({
+              statusEpisodio: "IdCapitulo" in response,
+            });
+          })
+          .catch(error => {
+            ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+          }); 
+        Promise.all([r1, r2, r3])
         .then((resultados) => {
             console.log(this.datosSerie);
             this.setState({
@@ -104,6 +157,16 @@ export default class EpisodioScreen extends Component {
                                         </TouchableOpacity>
                                         <TouchableOpacity style={styles.leerMasButton} onPress={this.volverTemporada}>
                                             <Text style={{color: "white", fontFamily: "sans-serif"}}>Temporada {this.state.numTemporada}</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={this.switchCapitulo} style={{alignSelf: "flex-end", backgroundColor: "#000000CC",
+                                                                padding: 3, borderRadius: 25, marginRight: 8, marginBottom: 3}}>
+                                                                
+                                          {!this.state.statusEpisodio && (
+                                            <Icon name="pluscircleo" type="antdesign" color="#ffc045" size={40}></Icon>
+                                          )}
+                                          {this.state.statusEpisodio && (
+                                            <Icon name="checkcircle" type="antdesign" color="#ffc045" size={40}></Icon>
+                                          )}
                                         </TouchableOpacity>
                                 </ImageBackground>
                                 <Text style={styles.descripcionText}>{this.state.descripcionEpisodio}</Text>
