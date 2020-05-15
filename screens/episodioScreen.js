@@ -36,8 +36,7 @@ async function GestionarVisto(idCapitulo, idSerie, numEpisodio, numTemporada, vi
   headers.append("Content-Type",  "application/json");
   headers.append("Accept-Language", "es");
   headers.append("Authorization", "Bearer "+token);
-  let resultado = await fetch(config.endpoint+"Capitulo?idCapitulo="+idCapitulo+"&idSerie="+idSerie+
-                  "&numCapitulo="+numEpisodio+"&numTemporada="+numTemporada,
+  let resultado = await fetch(config.endpoint+"Capitulo?idCapitulo="+idCapitulo+"&idSerie="+idSerie,
                   {
                     method: view ? "POST" : "DELETE",
                     headers: headers,

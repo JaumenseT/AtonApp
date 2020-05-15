@@ -130,6 +130,8 @@ export default class SerieScreen extends Component {
   
   componentDidMount() {
     this.setState({status: constants.WAITING});
+    this.props.navigation.addListener('focus', () => {
+    //this.setState({status: constants.WAITING});
     let tvdb = new TVDB(config.tvdb_key);
     tvdb.language = "es";
     
@@ -197,6 +199,7 @@ export default class SerieScreen extends Component {
             status: constants.ERROR,
           });
         });
+      });
   }
 
 

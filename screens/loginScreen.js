@@ -39,7 +39,7 @@ export default class LoginScreen extends Component {
       .then(response => {
         AsyncStorage.setItem("token", response.token)
         .then(() => {
-          this.props.navigation.navigate('Home');
+          this.props.navigation.navigate('Inicio');
         });
       })
       .catch(error => {

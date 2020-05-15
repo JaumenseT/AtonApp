@@ -9,6 +9,7 @@ import RegisterScreen from './screens/registerScreen';
 import TemporadaScreen from './screens/temporadaScreen';
 import EpisodioScreen from "./screens/episodioScreen";
 import HomeScreen from './screens/homeScreen';
+import InicioScreen from './screens/inicioScreen';
 
 const Stack = createStackNavigator();
 
@@ -88,37 +89,13 @@ export default function App() {
         />
 
         <Stack.Screen
-          name="Home"
-          component={HomeScreen}
+          name="Inicio"
+          component={InicioScreen}
           options={{
             headerShown: false
           }}
         />
                 
-        <Stack.Screen
-          name="Serie"
-          component={SerieScreen}
-          options={{
-            title: "",
-          }}
-        />
-
-        <Stack.Screen
-          name="Temporada"
-          component={TemporadaScreen}
-          options={{
-            title: "",
-          }}
-        />
-
-        <Stack.Screen
-          name="Episodio"
-          component={EpisodioScreen}
-          options={{
-            title: "",
-          }}
-        />
-        
       </Stack.Navigator>
     </NavigationContainer>
   );
