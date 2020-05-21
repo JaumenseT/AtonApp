@@ -62,8 +62,6 @@ export default class EpisodioScreen extends Component {
         numValoraciones: "",
         statusEpisodio: false
       }
-      this.idSerie = this.props.route.params.idSerie;
-      this.idEpisodio = this.props.route.params.idEpisodio;
     }
 
     async ObtenerEpisodio() {
@@ -95,6 +93,9 @@ export default class EpisodioScreen extends Component {
     }
 
     componentDidMount() {
+      this.props.navigation.addListener('focus', () => {
+        this.idSerie = this.props.route.params.idSerie;
+        this.idEpisodio = this.props.route.params.idEpisodio;
         this.setState({status: constants.WAITING});
         let r1 = this.ObtenerEpisodio();
         let r2 = this.ObtenerInformacion();
@@ -129,6 +130,7 @@ export default class EpisodioScreen extends Component {
             console.info(error);
             this.setState({status: constants.ERROR})
         });
+      });
     }
 
     render() {

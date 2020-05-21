@@ -12,6 +12,7 @@ import RegisterScreen from './registerScreen';
 import TemporadaScreen from './temporadaScreen';
 import EpisodioScreen from "./episodioScreen";
 import HomeScreen from './homeScreen';
+import MySeriesScreen from './mySeriesScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -71,6 +72,62 @@ function HomeStackScreen() {
     );
 }
 
+const MySeriesStack = createStackNavigator();
+
+function MySeriesStackScreen() {
+    return (
+            <MySeriesStack.Navigator
+                screenOptions={{
+                    headerStyle: {
+                        backgroundColor: '#282828',
+                        shadowColor: "transparent",
+                        shadowRadius: 0,
+                        shadowOffset: {
+                            height: 0
+                        }
+                    },
+                    headerTintColor: '#fff',
+                    headerTitleStyle: {
+                        fontWeight: 'normal',
+                    },
+                }}>
+
+                <MySeriesStack.Screen
+                    name="MySeries"
+                    component={MySeriesScreen}
+                    options={{
+                        headerShown: false
+                    }}
+                />
+
+                <MySeriesStack.Screen
+                    name="Serie"
+                    component={SerieScreen}
+                    options={{
+                        title: "",
+                    }}
+                />
+
+                <MySeriesStack.Screen
+                    name="Temporada"
+                    component={TemporadaScreen}
+                    options={{
+                        title: "",
+                    }}
+                />
+
+                <MySeriesStack.Screen
+                    name="Episodio"
+                    component={EpisodioScreen}
+                    options={{
+                        title: "",
+                    }}
+                />
+
+            </MySeriesStack.Navigator>
+    );
+}
+
 export default class InicioScreen extends Component {
 
     constructor(props) {
@@ -101,8 +158,8 @@ export default class InicioScreen extends Component {
                                 <Icon name="tv" type="entypo" color={color}></Icon>
                             ),
                         }} 
-                        name="Login" 
-                        component={LoginScreen} />
+                        name="MySeries" 
+                        component={MySeriesStackScreen} />
                     <Tab.Screen 
                         options={{
                             tabBarIcon: ({color}) => (

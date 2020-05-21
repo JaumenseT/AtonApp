@@ -10,6 +10,7 @@ import TemporadaScreen from './screens/temporadaScreen';
 import EpisodioScreen from "./screens/episodioScreen";
 import HomeScreen from './screens/homeScreen';
 import InicioScreen from './screens/inicioScreen';
+import MySeriesScreen from './screens/mySeriesScreen';
 
 const Stack = createStackNavigator();
 
@@ -85,6 +86,14 @@ export default function App() {
             headerStyle: {
               backgroundColor: "#065471"
             }
+          }}
+        />
+
+        <Stack.Screen
+          name="MySeries"
+          component={MySeriesScreen}
+          options={{
+            headerShown: false
           }}
         />
 

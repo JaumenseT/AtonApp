@@ -12,6 +12,27 @@ import ScalableImage from "react-native-scalable-image";
 import { Divider, Icon } from 'react-native-elements';
 import { NavigationContainer } from '@react-navigation/native';
 import SerieScreen from './serieScreen';
+import AsyncStorage from '@react-native-community/async-storage';
+
+async function GetUserNextCapitulos() {
+    let token = await AsyncStorage.getItem("token");
+    let headers=new Headers();
+    headers.append("Content-Type",  "application/json");
+    headers.append("Accept-Language", "es");
+    headers.append("Authorization", "Bearer "+token);
+    let resultado = await fetch(config.endpoint+"Capitulo",
+                    {
+                      method: "GET",
+                      headers: headers,
+                    });
+    let json = await resultado.json();
+    console.log(json);
+    if (json.error) {
+      throw new Error(json.error);
+    } else {
+      return json;
+    }
+  }
 
 function SerieComponent(props) {
     return (
@@ -28,6 +49,24 @@ function SerieComponent(props) {
     )
 }
 
+function CapituloPorVer(props) {
+    return (
+        <TouchableOpacity
+            style={{ flexDirection: "row", backgroundColor: "#3e3e3e", marginTop: 10, alignItems: "center", margin: 10 }}
+            onPress={props.onPress}>
+            <Image
+            source={{ uri: config.URLBanner + props.image }}
+            style={{ width: 100, height: 130 }}
+            resizeMode="cover">
+            </Image>
+            <View style={{flex: 1, justifyContent: "center"}}>
+                <Text style={styles.serieTitle} numberOfLines={2}>{props.numTemporada}x{props.numCapitulo} {props.capituloName}</Text>
+                <Text style={styles.button}>{props.seriesName}</Text>
+            </View>
+        </TouchableOpacity>
+    )
+}
+
 
 export default class HomeScreen extends Component {
     constructor(props) {
@@ -35,9 +74,25 @@ export default class HomeScreen extends Component {
         this.state = {
             buscador: "",
             series: [],
+            nextCapitulos: [],
             buscando: false,
             mensajeError: false,
         }
+    }
+
+    componentDidMount() {
+        this.setState({status: constants.WAITING});
+        this.props.navigation.addListener('focus', () => {
+            GetUserNextCapitulos()
+            .then(response => {
+                this.setState({
+                    nextCapitulos: response,
+                    status: constants.OK,
+                });
+            }).catch(error => {
+                ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+            });
+        });
     }
 
     buscadorOnChange = (texto) => {
@@ -61,8 +116,20 @@ export default class HomeScreen extends Component {
     }
 
     serieOnClick = (id) => {
+        this.setState({
+            buscador: "",
+            series: [],
+        })
         this.props.navigation.navigate("Serie", {
             idSerie: id,
+        })
+    }
+
+    capituloOnClick = (id, idSerie) => {
+        console.log(id);
+        this.props.navigation.navigate("Episodio", {
+            idEpisodio: id,
+            idSerie: idSerie,
         })
     }
 
@@ -96,11 +163,11 @@ export default class HomeScreen extends Component {
 
     render() {
         return (
-
             <SafeAreaView style={styles.container}>
                 <ScrollView style={{ width: "100%" }}>
                     <View style={{ flexDirection: "row", backgroundColor: "white", alignItems: "center", justifyContent: "space-between", paddingRight: 8 }}>
                         <TextInput
+                            clearButtonMode="always"
                             placeholder={"Busca algo aquí..."}
                             onChangeText={this.buscadorOnChange}
                             value={this.state.buscador}
@@ -135,6 +202,24 @@ export default class HomeScreen extends Component {
                                     }}>
                                 </SerieComponent>
                             );
+                        })
+                    )}
+
+                    {!this.state.buscando && !this.state.mensajeError && this.state.series.length==0 && (
+                        this.state.nextCapitulos.map((item) => {
+                            return (
+                                <CapituloPorVer
+                                key={item.IdCapitulo}
+                                image={item.SeriesPhoto}
+                                numCapitulo={item.NumCapitulo}
+                                numTemporada={item.NumTemporada}
+                                seriesName={item.SeriesName}
+                                capituloName={item.NameCapitulo}
+                                onPress={() => {
+                                    this.capituloOnClick(item.IdCapitulo, item.IdSerie);
+                                }}>    
+                                </CapituloPorVer>
+                            )
                         })
                     )}
 
@@ -210,12 +295,13 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start"
     },
     button: {
-        width: 275,
-        paddingTop: 8,
-        paddingBottom: 8,
-        marginTop: 7,
+        padding: 5,
         borderRadius: 5,
-        backgroundColor: "#ffc045"
+        marginLeft: 10,
+        fontSize: 14,
+        color: "white",
+        backgroundColor: "#065471",
+        alignSelf: "flex-start"
     },
     buttonText: {
         fontSize: 20,
@@ -246,7 +332,6 @@ const styles = StyleSheet.create({
         fontFamily: "sans-serif",
         color: "#ffc045",
         padding: 8,
-        flex: 1
     },
     episodioStyle: {
         alignSelf: "center",
