@@ -110,7 +110,6 @@ export default class EpisodioScreen extends Component {
           }); 
         Promise.all([r1, r2, r3])
         .then((resultados) => {
-            console.log(this.datosSerie);
             this.setState({
                 status: constants.OK,
                 tituloSerie: this.datosSerie.seriesName,

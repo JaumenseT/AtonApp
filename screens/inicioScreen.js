@@ -13,6 +13,7 @@ import TemporadaScreen from './temporadaScreen';
 import EpisodioScreen from "./episodioScreen";
 import HomeScreen from './homeScreen';
 import MySeriesScreen from './mySeriesScreen';
+import ProfileScreen from './profileScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -166,8 +167,8 @@ export default class InicioScreen extends Component {
                                 <Icon name="user" type="entypo" color={color}></Icon>
                             ),
                         }} 
-                        name="Register" 
-                        component={RegisterScreen} />
+                        name="MyProfile" 
+                        component={ProfileScreen} />
                 </Tab.Navigator>
         );
     }

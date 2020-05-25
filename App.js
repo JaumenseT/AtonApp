@@ -11,6 +11,7 @@ import EpisodioScreen from "./screens/episodioScreen";
 import HomeScreen from './screens/homeScreen';
 import InicioScreen from './screens/inicioScreen';
 import MySeriesScreen from './screens/mySeriesScreen';
+import ProfileScreen from './screens/profileScreen';
 
 const Stack = createStackNavigator();
 
@@ -96,6 +97,14 @@ export default function App() {
             headerShown: false
           }}
         />
+
+        <Stack.Screen
+          name="MyProfile"
+          component={ProfileScreen}
+          options={{
+            headerShown: false
+          }}
+        />    
 
         <Stack.Screen
           name="Inicio"

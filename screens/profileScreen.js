@@ -10,13 +10,13 @@ import constants from '../constants';
 import AsyncStorage from '@react-native-community/async-storage';
 
 
-async function GetSeriesUsuario() {
+async function GetDatosUsuario() {
     let token = await AsyncStorage.getItem("token");
     let headers=new Headers();
     headers.append("Content-Type",  "application/json");
     headers.append("Accept-Language", "es");
     headers.append("Authorization", "Bearer "+token);
-    let resultado = await fetch(config.endpoint+"Series",
+    let resultado = await fetch(config.endpoint+"Usuarios",
                     {
                       method: "GET",
                       headers: headers,
@@ -28,53 +28,39 @@ async function GetSeriesUsuario() {
     } else {
       return json;
     }
-  } 
+} 
 
-function SerieComponent(props) {
-    return (
-        <TouchableOpacity
-            style={{ flexDirection: "row", backgroundColor: "#3e3e3e", marginTop: 10, alignItems: "center", margin: 10 }}
-            onPress={props.onPress}>
-            <Image
-                source={{ uri: config.URLBanner + props.image }}
-                style={{ width: 100, height: 130 }}
-                resizeMode="cover">
-            </Image>
-            <Text style={styles.serieTitle} numberOfLines={2}>{props.nameSerie}</Text>
-        </TouchableOpacity>
-    )
-}
 
-export default class MySeriesScreen extends Component {
+export default class ProfileScreen extends Component {
     constructor(props) {
         super(props);
         this.state = {
             status: constants.WAITING,
-            series: [],
-            buscando: false,
-            mensajeError: false,
+            name: "",
+            userName: "",
+            seriesVistas: null,
+            episodiosVistos: null,
         }
-    }
-
-    serieOnClick = (id) => {
-        this.props.navigation.navigate("Serie", {
-            idSerie: id,
-        })
     }
 
     componentDidMount() {
         this.setState({status: constants.WAITING});
         this.props.navigation.addListener('focus', () => {
-            GetSeriesUsuario()
+            GetDatosUsuario()
             .then(response => {
                 this.setState({
-                    series: response,
                     status: constants.OK,
-                });
-            }).catch(error => {
-                ToastAndroid.showWithGravity(error.message, ToastAndroid.LONG, ToastAndroid.TOP);
+                    name: response.user.Name,
+                    userName: response.user.UserName,
+                    seriesVistas: response.seriesVistas,
+                    episodiosVistos: response.episodiosVistos,
+                })
             });
         });
+    }
+
+    logout = () => {
+        this.props.navigation.navigate('Login');
     }
 
     render() {
@@ -91,23 +77,57 @@ export default class MySeriesScreen extends Component {
                         </View>
                     )}
                     { this.state.status==constants.OK && (
-                      <React.Fragment>
-                        <Text style={styles.tituloPantalla}>Mis Series</Text>
-                        {
-                          this.state.series.map((item) => {
-                            return (
-                                <SerieComponent
-                                nameSerie={item.SeriesName}
-                                image={item.SeriesPhoto}
-                                key={item.IdSerie}
-                                onPress={() => {
-                                    this.serieOnClick(item.IdSerie);
-                                }}>
-                                </SerieComponent>
-                            )
-                        })
-                        }
-                      </React.Fragment>
+                        <View style={{alignItems: "center"}}>
+                            <Text style={styles.tituloPantalla}>
+                                Perfil
+                            </Text>
+                            <Image
+                                source={require('../images/profile.png')}
+                                style={{ width: 150, height: 150, margin: 10 }}
+                                resizeMode="cover">
+                            </Image>
+                            <View style={{flexDirection: "row"}}>
+                                <Text style={styles.serieTitle}>
+                                    Username:
+                                </Text>
+                                <Text style={styles.datosUsuario}>
+                                    {this.state.userName}
+                                </Text>
+                            </View>
+                            <View style={{flexDirection: "row"}}>
+                                <Text style={styles.serieTitle}>
+                                    Name:
+                                </Text>
+                                <Text style={styles.datosUsuario}>
+                                    {this.state.name}
+                                </Text>
+                            </View>
+                            <View style={{flexDirection: "row"}}>
+                                <View style={{flexDirection: "row"}}>
+                                    <Text style={styles.serieTitle}>
+                                        Series:
+                                    </Text>
+                                    <Text style={styles.datosUsuario}>
+                                        {this.state.seriesVistas}
+                                    </Text>
+                                </View>
+                                <View style={{flexDirection: "row"}}>
+                                    <Text style={styles.serieTitle}>
+                                        Episodios:
+                                    </Text>
+                                    <Text style={styles.datosUsuario}>
+                                        {this.state.episodiosVistos}
+                                    </Text>
+                                </View>
+                            </View>
+                            <TouchableOpacity
+                                    style={styles.button}
+                                    onPress={this.logout}>
+                                    <Text style={styles.buttonText}>
+                                        Salir
+                                    </Text>
+                            </TouchableOpacity>
+                        </View>
                     )}
                 </ScrollView>
             </SafeAreaView>
@@ -160,6 +180,16 @@ const styles = StyleSheet.create({
       paddingBottom: 5,
       fontFamily: "sans-serif"
     },
+    textInput: {
+        borderColor: 'black',
+        borderWidth: 1,
+        fontSize: 16,
+        color: 'black',
+        backgroundColor: 'white',
+        borderRadius: 5,
+        margin: 5,
+        padding: 5,
+      },
     seccionesTextValue: {
       fontSize: 18,
       color: "#ffc045",
@@ -223,7 +253,14 @@ const styles = StyleSheet.create({
         fontFamily: "sans-serif",
         color: "#ffc045",
         padding: 8,
-        flex: 1
+        alignSelf: "center"
+    },
+    datosUsuario: {
+        fontSize: 20,
+        fontFamily: "sans-serif",
+        color: "white",
+        padding: 8,
+        alignSelf: "center"
     },
     episodioStyle: {
       alignSelf: "center",
